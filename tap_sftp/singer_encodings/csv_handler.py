@@ -3,12 +3,23 @@ import csv
 import io
 import os
 import re
+import sys
 
 from tap_sftp import decrypt
 from tap_sftp.singer_encodings import compression
 
 SDC_EXTRA_COLUMN = "_sdc_extra"
 SDC_META_COLUMNS = ['_sdc_source_file', '_sdc_source_lineno']
+
+# Set CSV field size limit to maximum possible value
+# Using a factor of 10 approach to handle potential overflow errors
+max_int = int(sys.maxsize)
+while True:
+    try:
+        csv.field_size_limit(int(max_int))
+        break
+    except OverflowError:
+        max_int = int(max_int // 10)
 
 
 def get_row_iterators(iterable, options={}, infer_compression=False):
